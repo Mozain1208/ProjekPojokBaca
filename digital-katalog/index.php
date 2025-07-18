@@ -31,31 +31,46 @@ require_once '../includes/navbar.php';
             <button type="submit">Cari</button>
         </form>
 
-        <!-- Recomendasi Buku-->
+        <!-- Rekomendasi Buku -->
         <h2>Rekomendasi Buku</h2>
         <div class="book-list">
             <?php
             $query = "SELECT b.*, AVG(r.rating) as avg_rating 
                      FROM books b 
-                     LEFT JOIN ratings r ON b.id = r.book_id 
+                     LEFT JOIN ratings r ON b.id = r.id_buku 
                      GROUP BY b.id 
                      ORDER BY avg_rating DESC 
                      LIMIT 5";
             $result = mysqli_query($conn, $query);
-            while ($book = mysqli_fetch_assoc($result)) {
-                echo '<div class="book">';
-                echo '<img src="uploads/' . htmlspecialchars($book['cover']) . '" alt="Cover">';
-                echo '<h3>' . htmlspecialchars($book['title']) . '</h3>';
-                echo '<p>Penulis: ' . htmlspecialchars($book['author']) . '</p>';
-                echo '<p>Rating: ' . number_format($book['avg_rating'], 1) . '/5</p>';
-                echo '<p>Status: ' . ($book['status'] == 1 ? 'Tersedia' : 'Dipinjam') . '</p>';
-                echo '<a href="user/katalog.php?book_id=' . $book['id'] . '">Lihat Detail</a>';
-                echo '</div>';
+
+            if ($result) {
+                if (mysqli_num_rows($result) > 0) {
+                    while ($book = mysqli_fetch_assoc($result)) {
+                        echo '<div class="book">';
+                        echo '<img src="uploads/' . htmlspecialchars($book['cover']) . '" alt="Cover">';
+                        echo '<h3>' . htmlspecialchars($book['title']) . '</h3>';
+                        echo '<p>Penulis: ' . htmlspecialchars($book['author']) . '</p>';
+                        echo '<p>Rating: ' . number_format($book['avg_rating'], 1) . '/5</p>';
+                        echo '<p>Status: ' . ($book['status'] == 1 ? 'Tersedia' : 'Dipinjam') . '</p>';
+                        echo '<a href="user/katalog.php?book_id=' . $book['id'] . '">Lihat Detail</a>';
+                        echo '</div>';
+                    }
+                } else {
+                    echo '<p>Tidak ada data buku yang tersedia.</p>';
+                }
+            } else {
+                echo '<p>Terjadi kesalahan: ' . mysqli_error($conn) . '</p>';
             }
             ?>
         </div>
     </div>
 
-<?php require_once 'includes/footer.php'; ?>
+<?php
+if (file_exists('../includes/footer.php')) {
+    require_once '../includes/footer.php';
+} else {
+    echo '<p>File footer tidak ditemukan.</p>';
+}
+?>
 </body>
 </html>
